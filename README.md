@@ -13,3 +13,7 @@ The control in an editor of a numeric value (integer) that, internally, in conve
 ## Remarks
 
 The idea of this control comes from my Boiler, DeDietrich C-230-ECO, I want to develop a UI to be able to use it in Home Assistant.
+
+## Credits
+
+- This card project configuration was inspired on work from [pmongloid/flipdown-timer-card](https://github.com/pmongloid/flipdown-timer-card) and [@iantrich](https://github.com/iantrich)
