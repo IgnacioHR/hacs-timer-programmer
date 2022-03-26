@@ -4,7 +4,7 @@ WORK-IN-PROGRESS
 
 This is the UI for a timer programmer that allows to specify ON/OFF status for period of 24 hours divided in steps of 30 mintes. See the screen capture:
 
-![Timer Programmer screen capture](images/timer-programmer.png?raw=true)
+![Timer Programmer screen capture](timer-programmer.png?raw=true)
 
 The rectangles in black indicates ON status and the absence of black rectangle indicates OFF status
 
