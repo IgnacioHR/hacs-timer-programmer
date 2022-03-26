@@ -1,0 +1,9 @@
+{
+	"domain": "timer-programmer",
+	"documentation": "https://github.com/IgnacioHR/hacs-timer-programmer",
+	"issue-tracker": "https://github.com/IgnacioHR/hacs-timer-programmer/issues",
+	"dependencies": [],
+	"codeowners": ["@IgnacioHR"],
+	"name": "Timer programmer",
+	"version": "0.0.1"
+}
