@@ -1,0 +1,124 @@
+<html>
+	<head>
+		<script>
+			function dpr() {
+				return window.devicePixelRatio || 1;
+			}
+			function setupCanvas(canvas) {
+				const pr = dpr();
+				const rect = canvas.getBoundingClientRect();
+				canvas.width = rect.width * pr;
+				canvas.height = rect.height * pr;
+				const ctx = canvas.getContext('2d');
+				ctx.scale(pr, pr);
+				return ctx;
+			}
+			function canvasParams(ctx, canvas) {
+				ctx.font = 'bold 10px sans-serif';
+				ctx.textAlign = 'center';
+				ctx.textBaseline = 'bottom';
+				const pr = dpr();
+				let maxWidth = 0;
+				let maxHeight = 0;
+				const withByValue = [];
+				for (let i=0; i <=24; i+=2) {
+					const tm = ctx.measureText(i.toString());
+					withByValue[i] = tm.width;
+					if (tm.width > maxWidth) {
+						maxWidth = tm.width;
+					}
+					if (tm.fontBoundingBoxAscent > maxHeight) {
+						maxHeight = tm.fontBoundingBoxAscent;
+					}
+				}
+				return {
+					maxWidth: maxWidth,
+					maxHeight: maxHeight,
+					widthByValue: withByValue,
+					leftOrRightMargin: maxWidth / 2,
+					partWidth: (canvas.width/pr - maxWidth) / 24,
+					pr: pr,
+					marginTop: 1,
+					marginBottom: 1,
+					marginBar: 8
+				}
+			}
+			function draw() {
+				// const timedata = [ 
+				// 	true,  true,  false, false, false, false, false, false, // 0
+				// 	false, false, false, false, false, true,  true,  true,  // 8
+				// 	true,  true,  true,  true,  false, false, false, false, // 16
+				// 	false, false, false, false, false, false, true,  true,  // 32
+				// 	true,  true,  true,  true,  true,  true,  true,  true,  // 40
+				// 	true,  true,  true,  true,  true,  true,  true,  true,  // 48
+				// ];
+				const timedata = 211110259326975;
+				drawTimebar();
+				drawConfort(timedata);
+			}
+			function drawTimebar() {
+				const canvas = document.getElementById('timebar');
+				if (canvas.getContext) {
+					var ctx = setupCanvas(canvas);
+					var params = canvasParams(ctx, canvas);
+					ctx.beginPath();
+					for (let i=0; i<=24; i++) {
+						const x = i * params.partWidth + params.leftOrRightMargin;
+						ctx.moveTo(x, canvas.height/params.pr - params.marginBottom - params.maxHeight);
+						ctx.lineTo(x, params.marginTop);
+						if (i < 24)
+							ctx.lineTo((i+1)*params.partWidth + params.leftOrRightMargin, params.marginTop);
+						if (i % 2 === 0)
+							ctx.fillText(i.toString(), x , canvas.height/params.pr - params.marginBottom, params.maxWidth);
+					}
+					ctx.stroke();			
+				}
+			}
+			function drawConfort(timedata) {
+				const canvas = document.getElementById('confort');
+				if (canvas.getContext) {
+					var ctx = setupCanvas(canvas);
+					var params = canvasParams(ctx, canvas);
+					ctx.beginPath();
+					var inset = 2;
+					var colwidth = params.partWidth / 2;
+					const timedatas = timedata.toString(2);
+					const ptd = '000000000000000000000000000000000000000000000000'.substring(timedatas.length) + timedatas;
+					for (let i=0; i<48; i++) {
+						if ((ptd.charAt(i)) == '0')
+							continue;
+						const even = i % 2 !== 0;
+						const x = i * colwidth + params.leftOrRightMargin + inset - even * inset / 2;
+						const width = colwidth - inset - inset / 2;
+						const y = params.marginTop + inset;
+						const height = canvas.height/params.pr - params.marginBottom - params.maxHeight - params.marginBar; 
+						ctx.fillRect(x, y, width, height);
+					}
+					ctx.stroke();			
+				}
+			}
+		</script>
+		<style>
+			.timepanel {
+				width: 460px;
+				height: 38px;
+				position: absolute;
+			}
+			canvas {
+				/* transform: scale(0.68,0.68);
+				transform-origin: 0px; */
+				position: absolute;
+				width: 100%;
+				height: 100%;
+			}
+			#timebar { z-index: 1; }
+			#confort { z-index: 2; }
+		</style>
+	</head>
+	<body onload="draw()">
+		<div class="timepanel">
+			<canvas id="timebar" height="38" width="460"></canvas>
+			<canvas id="confort" height="38" width="460"></canvas>
+		</div>
+	</body>
+</html>
