@@ -97,13 +97,27 @@
 					ctx.stroke();			
 				}
 			}
+			function start() {
+				function onResize( element, callback ){
+					var elementHeight = element.offsetHeight,
+							elementWidth = element.offsetWidth;
+					setInterval(function(){
+							if( element.offsetHeight !== elementHeight || element.offsetWidth !== elementWidth ){
+								elementHeight = element.offsetHeight;
+								elementWidth = element.offsetWidth;
+								callback();
+							}
+					}, 300);
+				}
+
+				var element = document.getElementsByTagName("div")[0];
+				window.addEventListener("resize", () => { 
+					onResize( element, draw );  
+				})
+				draw();
+			}
 		</script>
 		<style>
-			.timepanel {
-				width: 460px;
-				height: 38px;
-				position: absolute;
-			}
 			canvas {
 				/* transform: scale(0.68,0.68);
 				transform-origin: 0px; */
@@ -115,8 +129,8 @@
 			#confort { z-index: 2; }
 		</style>
 	</head>
-	<body onload="draw()">
-		<div class="timepanel">
+	<body onload="start()">
+		<div class="timepanel" style="position: relative; height: 38px;">
 			<canvas id="timebar" height="38" width="460"></canvas>
 			<canvas id="confort" height="38" width="460"></canvas>
 		</div>

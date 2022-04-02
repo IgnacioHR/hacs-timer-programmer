@@ -8,4 +8,7 @@ export const styles = css`
 		display: flex;
 		flex-direction: column;
 	}
+	.s {
+		width: 100%;
+	}
 `

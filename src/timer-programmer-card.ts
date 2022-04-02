@@ -4,7 +4,6 @@ import {
 	LovelaceCardEditor
 } from 'custom-card-helpers';
 import {
-	css,
 	CSSResultGroup,
 	html,
 	LitElement,
@@ -12,9 +11,6 @@ import {
 	TemplateResult,
 	unsafeCSS
 } from 'lit';
-import {
-	styleMap
-} from 'lit/directives/style-map'
 
 import './editor';
 
@@ -106,24 +102,25 @@ export class TimerProgrammerCard extends LitElement {
       html`<hui-generic-entity-row .hass=${this.hass} .config=${this.config}></hui-generic-entity-row>`:
       html``}
 				${html`
-					<div id="timepanel" style="
-							position: relative;
-							height: 38px;
-						">
-						<canvas class="timebar" height="50" width="600" 
-							style="
-								position: absolute;
-								width: 100%;
-								height: 100%;
-								z-index: 1;
-								"></canvas>
-						<canvas class="confort" height="50" width="600"
-							style="
-								position: absolute;
-								width: 100%;
-								height: 100%;
-								z-index: 2;
-							"></canvas>
+					<div class="d">
+						<svg width="460" height="38" version="1.1" viewBox="0 0 460 38" id="timerprogrammer" xmlns="http://www.w3.org/2000/svg" class="s">
+							<style>
+								.t {
+									font: bold 10px sans-serif;
+									dominant-baseline: bottom;
+									text-anchor: middle;
+									fill: var(--primary-text-color);
+								}
+								.l {
+									fill: transparent;
+									stroke: var(--primary-text-color);
+									stroke-width: 1;	
+								}
+								.r {
+									fill: var(--primary-text-color);
+								}
+							</style>
+						</svg>
 					</div>
 				`}
 				</div>
@@ -132,10 +129,10 @@ export class TimerProgrammerCard extends LitElement {
 	}
 
 	protected _init(): void {
-		const tpdiv = this.shadowRoot?.getElementById('timepanel');
-		if (tpdiv) {
+		const tp = this.shadowRoot?.getElementById('timerprogrammer') as SVGSVGElement | null;
+		if (tp) {
 			if (!this.tp && this.config.entity) {
-				this.tp = new TimerProgrammerLogic(tpdiv);
+				this.tp = new TimerProgrammerLogic(tp);
 				const state = this.hass.states[this.config.entity!].state;
 				this.tp.draw(state);
 			}

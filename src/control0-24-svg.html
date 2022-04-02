@@ -1,0 +1,155 @@
+<html>
+	<head>
+		<script>
+			const SVG_NS = "http://www.w3.org/2000/svg";
+
+			function parameters(svg) {
+				let maxWidth = 0;
+				let maxHeight = 0;
+				let svgWidth = svg.width.baseVal.value;
+				let svgHeight = svg.height.baseVal.value;
+				const nodesMap = [];
+				const nodesWidth = []
+				for (let i=0; i <=24; i+=2) {
+					let text = document.createElementNS(SVG_NS, "text");
+					svg.appendChild(text);
+					nodesMap[i] = text;
+					text.setAttributeNS(null, "class", "t");
+					text.setAttributeNS(null, "x", svgWidth/2);
+					text.setAttributeNS(null, "y", svgHeight/2);
+					var textNode = document.createTextNode(i.toString());
+					text.appendChild(textNode);
+					nodesWidth[i] = text.getComputedTextLength();
+					if (nodesWidth[i] > maxWidth) {
+						maxWidth = nodesWidth[i];
+					}
+					if (text.getBBox().height > maxHeight) {
+						maxHeight = text.getBBox().height;
+					}
+				}
+				return {
+					svgWidth: svgWidth,
+					svgHeight: svgHeight,
+					maxWidth: maxWidth,
+					maxHeight: maxHeight,
+					nodesMap: nodesMap,
+					nodesWidth: nodesWidth,
+					leftOrRightMargin: maxWidth / 2,
+					partWidth: (svgWidth - maxWidth) / 24,
+					marginTop: 1,
+					marginBottom: 1,
+					marginBar: 8,
+					inset: 2
+				}
+			}
+			function draw() {
+				// const timedata = [ 
+				// 	true,  true,  false, false, false, false, false, false, // 0
+				// 	false, false, false, false, false, true,  true,  true,  // 8
+				// 	true,  true,  true,  true,  false, false, false, false, // 16
+				// 	false, false, false, false, false, false, true,  true,  // 32
+				// 	true,  true,  true,  true,  true,  true,  true,  true,  // 40
+				// 	true,  true,  true,  true,  true,  true,  true,  true,  // 48
+				// ];
+				const svg = document.getElementById('timerprogrammer'); // SVGSVGElement
+				if (svg) {
+					var params = parameters(svg);
+					drawTimebar(svg, params);
+					const timedata = 211110259326975;
+					drawConfort(timedata, svg, params);
+				}
+			}
+			function drawTimebar(svg, params) {
+				let path = document.createElementNS(SVG_NS, "path");
+				svg.appendChild(path);
+				path.setAttributeNS(null,"class", "l");
+				let pathtext = '';
+				for (let i=0; i<=24; i++) {
+					const x = i * params.partWidth + params.leftOrRightMargin;
+					const y = params.marginTop;
+					const y2 = params.svgHeight - params.marginBottom - params.maxHeight;
+					pathtext = pathtext.concat('M',x, ' ', y, 'v', y2, 'z');
+					if (i < 24) 
+						pathtext = pathtext.concat('h', params.partWidth);
+					pathtext = pathtext.concat('z');
+					if (i % 2 === 0) {
+						var nodetext = params.nodesMap[i];
+						nodetext.setAttributeNS(null, "x", x);
+						nodetext.setAttributeNS(null, "y", svg.height.baseVal.value - params.marginBottom);
+					}
+				}
+				path.setAttributeNS(null, "d", pathtext);
+			}
+			function drawConfort(timedata, svg, params) {
+				var colwidth = params.partWidth / 2;
+				const timedatas = timedata.toString(2);
+				const ptd = '000000000000000000000000000000000000000000000000'.substring(timedatas.length) + timedatas;
+				for (let i=0; i<48; i++) {
+					if ((ptd.charAt(i)) == '0')
+						continue;
+					const even = i % 2 !== 0;
+					const x = i * colwidth + params.leftOrRightMargin + params.inset - even * params.inset / 2;
+					const width = colwidth - params.inset - params.inset / 2;
+					const y = params.marginTop + params.inset;
+					const height = params.svgHeight - params.marginBottom - params.maxHeight - params.marginBar; 
+					// ctx.fillRect(x, y, width, height);
+					let rect = document.createElementNS(SVG_NS, "rect");
+					svg.appendChild(rect);
+					rect.setAttributeNS(null, "x", x);
+					rect.setAttributeNS(null, "y", y);
+					rect.setAttributeNS(null, "width", width);
+					rect.setAttributeNS(null, "height", height);
+					rect.setAttributeNS(null, "class", "r");
+				}
+			}
+			function start() {
+				// function onResize( element, callback ){
+				// 	var elementHeight = element.offsetHeight,
+				// 			elementWidth = element.offsetWidth;
+				// 	setInterval(function(){
+				// 			if( element.offsetHeight !== elementHeight || element.offsetWidth !== elementWidth ){
+				// 				elementHeight = element.offsetHeight;
+				// 				elementWidth = element.offsetWidth;
+				// 				callback();
+				// 			}
+				// 	}, 300);
+				// }
+
+				// var element = document.getElementsByTagName("div")[0];
+				// window.addEventListener("resize", () => { 
+				// 	onResize( element, draw );  
+				// })
+				draw();
+			}
+		</script>
+		<style type="text/css">
+			.d {
+				width: 300px;
+			}
+			.s {
+				width: 100%;
+			}
+		</style>
+	</head>
+	<body onload="start()">
+		<div class="d">
+			<svg width="460" height="38" version="1.1" viewBox="0 0 460 38" id="timerprogrammer" xmlns="http://www.w3.org/2000/svg" class="s">
+				<style>
+					.t {
+						font: bold 10px sans-serif;
+						dominant-baseline: bottom;
+						text-anchor: middle;
+					}
+					.l {
+						fill: transparent;
+						stroke: black;
+						stroke-width: 1;	
+					}
+					.r {
+						fill: black;
+					}
+				</style>
+			</svg>
+		</div>
+	</body>
+</html>
