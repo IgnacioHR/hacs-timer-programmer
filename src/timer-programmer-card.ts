@@ -56,6 +56,7 @@ export class TimerProgrammerCard extends LitElement {
 		// tiene { type: "..." }
 		this.config = {
 			...config,
+			type: 'timer-programmer-card'
 		};
 	}
 
@@ -107,7 +108,6 @@ export class TimerProgrammerCard extends LitElement {
 							<style>
 								.t {
 									font: bold 10px sans-serif;
-									dominant-baseline: bottom;
 									text-anchor: middle;
 									fill: var(--primary-text-color);
 								}
