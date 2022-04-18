@@ -72,20 +72,28 @@ export class TimerProgrammerCard extends LitElement {
 		if (this.tp && this.config.entity) {
 			const state = this.hass.states[this.config.entity!].state;
 			this.tp.draw(state);
-	} else {
+		} else {
 			this._init();
 		}
 		super.updated(changedProps);
-
-		// if (changedProps.has("hass")) {
-		// 	const stateObj = this.hass!.states[this.config.entity!];
-		// }
 	}
 
 	protected firstUpdated(changedProps: PropertyValues): null | void {
 		this._init()
     return super.firstUpdated(changedProps);
   }
+
+	private onSvgClick(event: Event): void {
+		if (event instanceof CustomEvent) {
+			// console.log('event %s', event.detail);
+			const entity = this.config.entity;
+			// const stateObj = this.hass.states[entity!].state;
+			this.hass.callService(entity.split(".", 1)[0], "toggle_bit", {
+				bit: event.detail,
+				entity_id: entity,
+			});
+		}
+	}
 
 	protected render(): TemplateResult | void {
 		if (this.config.show_warning) {
@@ -104,7 +112,7 @@ export class TimerProgrammerCard extends LitElement {
       html``}
 				${html`
 					<div class="d">
-						<svg width="460" height="38" version="1.1" viewBox="0 0 460 38" id="timerprogrammer" xmlns="http://www.w3.org/2000/svg" class="s">
+						<svg width="460" height="38" version="1.1" viewBox="0 0 460 38" id="timerprogrammer" xmlns="http://www.w3.org/2000/svg" class="s" @click="${this.onSvgClick}">
 							<style>
 								.t {
 									font: bold 10px sans-serif;
@@ -116,8 +124,15 @@ export class TimerProgrammerCard extends LitElement {
 									stroke: var(--primary-text-color);
 									stroke-width: 1;	
 								}
-								.r {
+								.rEnabled {
 									fill: var(--primary-text-color);
+								}
+								.rDisabled {
+									fill: transparent;
+								}
+								.rBlinking {
+									animation: blinker 1s linear infinite;
+									fill: orangered;
 								}
 							</style>
 						</svg>
@@ -136,8 +151,6 @@ export class TimerProgrammerCard extends LitElement {
 				const state = this.hass.states[this.config.entity!].state;
 				this.tp.draw(state);
 			}
-			// const state = this.hass.states[this.config.entity!].state;
-
 		}
 	}
 

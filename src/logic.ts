@@ -1,5 +1,5 @@
 
-type CanvasParams = {
+type ImageParams = {
 	svgWidth: number,
 	svgHeight: number,
 	maxWidth: number,
@@ -17,23 +17,22 @@ export class TimerProgrammerLogic {
 
 	private SVG_NS = 'http://www.w3.org/2000/svg';
 
-	private params: CanvasParams | undefined;
+	private params: ImageParams | undefined;
 	private redrawTimebar = true;
 
 	constructor(private root: SVGSVGElement) {
 	}
 
-	private setParams(): CanvasParams | undefined {
-		// const color = getComputedStyle(this.root).getPropertyValue("--primary-text-color");
+	private getParams(): ImageParams | undefined {
 		let maxWidth = 0;
 		let maxHeight = 0;
 		let svgWidth = this.root.width.baseVal.value;
 		let svgHeight = this.root.height.baseVal.value;
-		const nodesMap = new Map<string, SVGTextElement>();
+		const textNodesMap = new Map<string, SVGTextElement>();
 		for (let i=0; i <=24; i+=2) {
 			let text = document.createElementNS(this.SVG_NS, "text") as SVGTextElement;
 			this.root.appendChild(text);
-			nodesMap['_'+i] = text;
+			textNodesMap['_'+i] = text;
 			text.setAttributeNS(null, "class", "t");
 			text.setAttributeNS(null, "x", (svgWidth/2).toString());
 			text.setAttributeNS(null, "y", (svgHeight/2).toString());
@@ -41,7 +40,9 @@ export class TimerProgrammerLogic {
 			text.appendChild(textNode);
 			const nodeWidth = text.getComputedTextLength();
 			if (nodeWidth === 0) {
-				Object.keys(nodesMap).forEach(k => nodesMap[k]?.remove() );
+				// the svg is not visible, size can't be calculated. it is not time to
+				// evaluate the params, let's do it later
+				Object.keys(textNodesMap).forEach(k => textNodesMap[k]?.remove() );
 				return undefined;
 			}
 			if (nodeWidth > maxWidth) {
@@ -56,7 +57,7 @@ export class TimerProgrammerLogic {
 			svgHeight: svgHeight,
 			maxWidth: maxWidth,
 			maxHeight: maxHeight,
-			nodesMap: nodesMap,
+			nodesMap: textNodesMap,
 			leftOrRightMargin: maxWidth / 2,
 			partWidth: (svgWidth - maxWidth) / 24,
 			marginTop: 1,
@@ -65,10 +66,10 @@ export class TimerProgrammerLogic {
 			inset: 2
 		}
 	}
-	private drawTimebar() {
+	private drawLinesAndLabels() {
 		if (this.redrawTimebar) {
 			if (!this.params)
-				this.params = this.setParams();
+				this.params = this.getParams();
 			if (!this.params)
 				return;
 			const oldElements = this.root.getElementsByTagNameNS(this.SVG_NS, "path");
@@ -95,9 +96,9 @@ export class TimerProgrammerLogic {
 			this.redrawTimebar = false;
 		}
 	}
-	private drawConfort(timedata: number) {
+	private drawSteps(timedata: number) {
 		if (!this.params)
-			this.params = this.setParams();
+			this.params = this.getParams();
 		if (!this.params)
 			return;
 		const oldElements = this.root.getElementsByTagNameNS(this.SVG_NS, "rect");
@@ -106,39 +107,41 @@ export class TimerProgrammerLogic {
 		const timedatas = timedata.toString(2);
 		const ptd = '000000000000000000000000000000000000000000000000'.substring(timedatas.length) + timedatas;
 		for (let i=0; i<48; i++) {
-			if ((ptd.charAt(i)) == '0')
-				continue;
 			const even = i % 2 !== 0;
 			const x = i * colwidth + this.params.leftOrRightMargin + this.params.inset - (even ? this.params.inset / 2 : 0);
 			const width = colwidth - this.params.inset - this.params.inset / 2;
 			const y = this.params.marginTop + this.params.inset;
 			const height = this.params.svgHeight - this.params.marginBottom - this.params.maxHeight - this.params.marginBar; 
-			// ctx.fillRect(x, y, width, height);
 			let rect = document.createElementNS(this.SVG_NS, "rect");
 			this.root.appendChild(rect);
+			rect.setAttributeNS(null, "id", "r_"+(47-i).toString());
 			rect.setAttributeNS(null, "x", x.toString());
 			rect.setAttributeNS(null, "y", y.toString());
 			rect.setAttributeNS(null, "width", width.toString());
 			rect.setAttributeNS(null, "height", height.toString());
-			rect.setAttributeNS(null, "class", "r");
+			rect.setAttributeNS(null, "class", ptd.charAt(i) == '1' ? "rEnabled" : "rDisabled");
+			rect.addEventListener('click', () => {
+				rect.setAttributeNS(null, "class", "rBlinking");
+				this.root.dispatchEvent(new CustomEvent('click', {detail: (47-i)}));
+			});
 		}
 	}
 	public draw(value: unknown): void {
 
 		const drawCode = () => {
-			this.drawTimebar();
+			this.drawLinesAndLabels();
 			let timedata: number = 0;
 			if (typeof value === 'number') {
 				timedata = value;
 			} else if (typeof value === 'string') {
 				timedata = parseInt(value.toString(), 10);
 			}
-			this.drawConfort(timedata);
+			this.drawSteps(timedata);
 		}
 
 		setTimeout(() => {
 			if (!this.params)
-				this.params = this.setParams();
+				this.params = this.getParams();
 			if (!this.params) {
 				this.draw(value);
 				return;
